@@ -1,0 +1,13 @@
+[Unit]
+Description=V2EX Channel Update Bot
+StartLimitIntervalSec=0
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User=<username>
+Environment="HedwigToken=<token>"
+ExecStart=<path to v2bot>
+
+[Install]
+WantedBy=multi-user.target
