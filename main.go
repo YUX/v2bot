@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -10,10 +11,18 @@ import (
 	"time"
 )
 
+type sendMessageReqBody struct {
+	ChatID string `json:"chat_id"`
+	Text   string `json:"text"`
+}
+
 type Post struct {
-	ID int `json:"id"`
-	//Title string `json:"title"`
-	//Url   string `json:"url"`
+	ID    int    `json:"id"`
+	Title string `json:"title"`
+	Url   string `json:"url"`
+	Node  struct {
+		Title string `json:"title"`
+	} `json:"node"`
 }
 type Posts []Post
 
@@ -26,9 +35,9 @@ func (posts Posts) IDList() []int {
 }
 
 var ids []int
+var posts = Posts{}
 
 func getList() ([]int, error) {
-	posts := Posts{}
 
 	url := "https://www.v2ex.com/api/topics/latest.json"
 	resp, err := http.Get(url)
@@ -68,10 +77,27 @@ func init() {
 func push(id int) {
 	token := os.Getenv("HedwigToken")
 	channel := "@V2EXChannel"
-	url := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage?chat_id=%s&text=https://www.v2ex.com/t/%d", token, channel, id)
-	_, err := http.Get(url)
-	if err != nil {
-		return
+
+	for _, post := range posts {
+		if post.ID == id {
+			node := post.Node.Title
+			title := post.Title
+			link := post.Url
+			reqBody := &sendMessageReqBody{
+				ChatID: channel,
+				Text:   fmt.Sprintf("#%s %s %s", node, title, link),
+			}
+			reqBytes, err := json.Marshal(reqBody)
+			if err != nil {
+				return
+			}
+			url := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", token)
+			_, err = http.Post(url, "application/json", bytes.NewBuffer(reqBytes))
+			if err != nil {
+				return
+			}
+
+		}
 	}
 }
 
