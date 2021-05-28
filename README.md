@@ -1,4 +1,7 @@
 # v2bot
 
-https://t.me/V2EXChannel
+## V2EX Channel Update Bot
 
+🔗**https://t.me/V2EXChannel**
+
+![screenshot](./screen.PNG)
